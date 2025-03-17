@@ -6,10 +6,12 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.ecommerce.ProductRepo;
 import com.example.ecommerce.model.Product;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 @Service
@@ -22,14 +24,11 @@ public class ProductService {
 	        return productRepo.findAll();
 	    }
 	    @Transactional
-	    public void addproducts(Product prod) {
-	        try {
-	            //productRepo.save(prod);
-	        	productRepo.save(prod);
-	        } catch (ObjectOptimisticLockingFailureException e) {
-	            System.err.println("Optimistic locking conflict: " + e.getMessage());
-	            throw e;
-	        }
+	    public Product addProduct(Product product, MultipartFile imageFile) throws IOException {
+	        product.setImageName(imageFile.getOriginalFilename());
+	        product.setImageType(imageFile.getContentType());
+	        product.setImageData(imageFile.getBytes());
+	        return productRepo.save(product);
 	    }
 
 	    public Optional<Product> getProductById(int id) {

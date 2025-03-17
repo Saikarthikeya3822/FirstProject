@@ -1,5 +1,7 @@
 package com.example.ecommerce.controller;
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.HttpStatus;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,11 +19,18 @@ public class ProdcutController {
 	        return service.getProducts();
 	    }
 
-	    @PostMapping("/addproduct")
-	    public ResponseEntity<String> addproduct(@RequestBody Product prod)
-	    {
-	        service.addproducts(prod);
-	        return ResponseEntity.ok("Product added successfully");
+	    @PostMapping(value = "/addproduct", consumes = "multipart/form-data")
+	    public ResponseEntity<?> addProduct( @RequestPart  Product product, 
+	    		@RequestPart(value = "imageFile", required = false) MultipartFile imageFile) {
+	        try {
+	        	if (imageFile == null) {
+	                return new ResponseEntity<>("No image file received", HttpStatus.BAD_REQUEST);
+	            }
+	            Product savedProduct = service.addProduct(product, imageFile);
+	            return new ResponseEntity<>(savedProduct, HttpStatus.CREATED);
+	        } catch (Exception e) {
+	            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+	        }
 	    }
 	    @GetMapping("/products/{id}")
 	    public Optional<Product> getproducts(@PathVariable int id) {
