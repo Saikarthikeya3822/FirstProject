@@ -103,6 +103,13 @@ const ProductList = ({ products, setProducts, loading, error,fetchProducts }) =>
                         <strong>Status:</strong>{" "}
                         {product.isActive ? "Active" : "Inactive"}
                       </p>
+                      {product.imageData && (
+                    <img
+                    src={`data:${product.imageType};base64,${product.imageData}`}
+                    alt={product.name}
+                  className="product-image"
+            />
+                  )}
                     </>
                   )}
 

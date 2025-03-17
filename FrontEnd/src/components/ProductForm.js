@@ -9,6 +9,17 @@ const ProductForm = ({ fetchProducts, setView }) => {
   const [creationDate, setCreationDate] = useState("");
   const [isActive, setIsActive] = useState(false);
   const [error, setError] = useState(null);
+  const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState(null);
+
+  const handleImageChange = (e) => {
+    console.log('In handleImage change:',e.target.files[0])
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      setPreview(URL.createObjectURL(file));
+    }
+  };
 
   // Handle form submission
   const handleSubmit = async (e) => {
@@ -16,7 +27,7 @@ const ProductForm = ({ fetchProducts, setView }) => {
     setError(null);
 
     // Validate inputs
-    if (!prodName || !price || !creationDate) {
+    if (!prodName || !price || !creationDate||!image) {
       setError("Please fill in all fields.");
       return;
     }
@@ -28,8 +39,8 @@ const ProductForm = ({ fetchProducts, setView }) => {
         creationDate: new Date(creationDate).toISOString(), // Convert to ISO string
         isActive,
       };
-
-      await saveProduct(product); // Save product to the backend
+      console.log("Submitting file:",image); // Ensure it's a File object
+      await saveProduct(product,image); // Save product to the backend
       alert("Product saved successfully.");
       fetchProducts(); // Refresh the product list
       setView("view"); // Switch back to the "View Products" view
@@ -82,6 +93,11 @@ const ProductForm = ({ fetchProducts, setView }) => {
             onChange={(e) => setIsActive(e.target.checked)}
           />
           <label className="form-check-label">Is Active</label>
+        </div>
+        <div className="form-group">
+          <label>Image</label>
+          <input type="file" accept="image/*" onChange={handleImageChange} />
+        {preview && <img src={preview} alt="Preview" className="preview-image" />}
         </div>
         {error && <p className="text-danger">{error}</p>}
         <div className="form-buttons">

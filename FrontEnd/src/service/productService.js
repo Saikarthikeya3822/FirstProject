@@ -9,16 +9,31 @@ export const getProducts = async () => {
     return response.json();
   };
   
-  export const saveProduct = async (product) => {
+  export const saveProduct = async (product,image) => {
+    const formData = new FormData();
+    
+    // Append the JSON product object as a Blob
+    formData.append("product", new Blob([JSON.stringify(product)], { type: "application/json" }));
+    
+    // Append the image file
+    formData.append("imageFile", image);
+
     const response = await fetch("http://localhost:8080/addproduct", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(product),
+        method: "POST",
+        body: formData, // Do NOT set Content-Type, fetch will handle it
+        headers: {
+          "Accept": "application/json" // Do NOT set Content-Type manually
+      }
     });
+
     if (!response.ok) {
-      throw new Error("Failed to save product.");
+        throw new Error("Failed to save product.");
     }
-  };
+
+    return response.json();
+};
+
+
   
   export const deleteAllProducts = async () => {
     const response = await fetch("http://localhost:8080/deleteallproducts", {
