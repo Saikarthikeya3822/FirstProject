@@ -2,6 +2,7 @@ package com.example.ecommerce.model;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.sql.Blob;
 import java.time.LocalDateTime;
 @Entity
 @Table(name="product")
@@ -22,6 +23,7 @@ public class Product {
     private String imageName;
     private String imageType;
     @Lob
+    //@Column(name = "image_data", columnDefinition = "BYTEA")
     private byte[] imageData;
 
     public boolean isActive() {

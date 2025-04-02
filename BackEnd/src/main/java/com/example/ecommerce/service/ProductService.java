@@ -44,7 +44,7 @@ public class ProductService {
 	        return ResponseEntity.noContent().build();
 
 	    }
-	    public Product updateProduct(int id, Product updatedProduct) {
+	    public Product updateProduct(int id, Product updatedProduct, MultipartFile imageFile)throws IOException {
 	      return productRepo.findById(id).map(product->{
 	         // product.setProdId(updatedProduct.getProdId());
 	          product.setProdName(updatedProduct.getProdName());
@@ -52,6 +52,14 @@ public class ProductService {
 	          product.setCreationDate(updatedProduct.getCreationDate());
 	          product.setActive(updatedProduct.isActive());
 	          product.setLastUpdated(updatedProduct.getLastUpdated());
+	          product.setImageName(imageFile.getOriginalFilename());
+	          product.setImageType(imageFile.getContentType());
+	          try {
+				product.setImageData(imageFile.getBytes());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	          return productRepo.save(product);
 	      }).orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
 	    }
@@ -61,5 +69,10 @@ public class ProductService {
 	        }
 	        productRepo.deleteById(id);;
 	    }
+		public List<Product> searchProducts(String keyword) {
+			// TODO Auto-generated method stub
+			return productRepo.searchProducts(keyword);
+			
+		}
 
 }
