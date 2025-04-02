@@ -3,13 +3,45 @@ import ProductList from "./components/ProductList";
 import ProductForm from "./components/ProductForm";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { getProducts,deleteAllProducts } from "./service/productService";
+
 import './styles/HomePage.css';
+import axios from "axios";
 
 const HomePage = () => {
   const [view, setView] = useState("view"); // Tracks the current view: "view" or "add"
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  //  Filter products based on searchQuery
+  const filteredProducts = products.filter((product) =>
+    (product.prodName && product.prodName.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    ( product.isActive !== undefined && 
+    (searchQuery.toLowerCase() === 'active' && product.isActive === true || 
+     searchQuery.toLowerCase() === 'Inactive' && product.isActive === false))
+  );
+
+
+
+  // Function to fetch products (searching with backend)
+  // const fetchSearchedProducts = async (query) => {
+  //   if (!query) {
+  //     fetchProducts(); // Fetch all products when search is cleared
+  //     return;
+  //   }
+    
+  //   try {
+  //     setLoading(true);
+  //     const response = await axios.get(`http://localhost:8080/products/search?keyword=${query}`);
+  //     setProducts(response.data);
+  //     setError(null);
+  //   } catch (err) {
+  //     setError("Error fetching search results.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   // Fetch products from the backend
   const fetchProducts = async () => {
@@ -26,7 +58,17 @@ const HomePage = () => {
     }
   };
 
+  // Debounce search (Wait before calling API to avoid too many requests)
+  // useEffect(() => {
+  //   const delaySearch = setTimeout(() => {
+  //     fetchSearchedProducts(searchQuery);
+  //   }, 500); // 500ms delay before API call
+
+  //   return () => clearTimeout(delaySearch);
+  // }, [searchQuery]);
+
   // Load products on component mount or when view changes to "view"
+
   useEffect(() => {
     if (view === "view") {
       fetchProducts();
@@ -71,16 +113,25 @@ const HomePage = () => {
             <button className="nav-link btn btn-danger" onClick={handleDeleteAll}>
               Delete All Products
             </button>
-            
+            {/* Search Bar */}
+          {view === "view" && (
+            <input
+              type="text"
+              className="form-control ms-3 w-25"
+              placeholder="Search Products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          )}
           </div>
         </div>
       </nav>
 
       {/* Main Content */}
-      <div className="container mt-4">
+      <div className="container ">
         {view === "view" ? (
           // View Products
-          <ProductList products={products} loading={loading} error={error} fetchProducts={fetchProducts}/>
+          <ProductList products={filteredProducts} loading={loading} error={error} fetchProducts={fetchProducts} />
         ) : (
           // Add Product Form
           <ProductForm fetchProducts={fetchProducts} setView={setView} />

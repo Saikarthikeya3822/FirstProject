@@ -4,11 +4,15 @@ import { handleDelete,handleUpdate } from "../service/productService";
 
 
 const ProductList = ({ products, setProducts, loading, error,fetchProducts }) => {
+  const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState(null);
   const [editProductId, setEditProductId] = useState(null);
   const [editedProduct, setEditedProduct] = useState({
     name: "",
     price: "",
     status: true,
+    image:null,
+
   });
 
   // Handle edit button click
@@ -18,6 +22,9 @@ const ProductList = ({ products, setProducts, loading, error,fetchProducts }) =>
       name: product.prodName,
       price: product.price,
       status: product.isActive,
+      image: product.imageData
+      ? { data: product.imageData, type: product.imageType || "image/jpeg" }
+      : null, 
     });
   };
   // Handle input changes
@@ -36,6 +43,16 @@ const ProductList = ({ products, setProducts, loading, error,fetchProducts }) =>
       status: e.target.value === "true", // Convert string to boolean
     }));
   };
+  // Handle image file change
+const handleImageChange = (e) => {
+  if (e.target.files && e.target.files[0]) {
+    setEditedProduct({
+      ...editedProduct,
+      image: e.target.files[0]
+    });
+  }
+};
+
 
   const handleDeleteClick=async(id)=>{
     await handleDelete(id,setProducts);
@@ -48,6 +65,8 @@ const ProductList = ({ products, setProducts, loading, error,fetchProducts }) =>
     setEditProductId(null); // Exit edit mode
   };
 
+  
+  
   return (
     <div>
       <h3 className="text-center mb-4">Product List</h3>
@@ -92,6 +111,22 @@ const ProductList = ({ products, setProducts, loading, error,fetchProducts }) =>
                         <option value="true">Active</option>
                         <option value="false">Inactive</option>
                       </select>
+                { <input type="file" accept="image/*" onChange={handleImageChange} className="form-control mb-2"/>}
+{/* Image preview component with proper null handling */}
+{editedProduct.image && (
+  <img 
+    src={
+      editedProduct.image instanceof File 
+        ? URL.createObjectURL(editedProduct.image) 
+        : `data:${editedProduct.image.type || 'image/jpeg'};base64,${editedProduct.image.data}`
+    } 
+    alt="Product preview" 
+    className="mt-2 w-full h-40 object-cover"
+    style={{ width: "200px", height: "200px" }}
+  />
+)}
+
+  
                     </>
                   ) : (
                     <>
@@ -103,13 +138,14 @@ const ProductList = ({ products, setProducts, loading, error,fetchProducts }) =>
                         <strong>Status:</strong>{" "}
                         {product.isActive ? "Active" : "Inactive"}
                       </p>
-                      {product.imageData && (
-                    <img
-                    src={`data:${product.imageType};base64,${product.imageData}`}
-                    alt={product.name}
-                  className="product-image"
-            />
-                  )}
+               {/* Display product image */}
+    {product.imageData && (
+      <img
+        src={`data:${product.imageType};base64,${product.imageData}`}
+        alt={product.prodName}
+        className="product-image"
+      />
+    )}
                     </>
                   )}
 
