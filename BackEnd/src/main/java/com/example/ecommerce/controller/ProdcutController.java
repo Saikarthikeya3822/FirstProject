@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.example.ecommerce.model.Product;
 import com.example.ecommerce.service.ProductService;
-@CrossOrigin
+@CrossOrigin(origins = "http://localhost:3000") // Allow frontend to call backend
 @RestController
 public class ProdcutController {
 	    @Autowired
