@@ -44,13 +44,14 @@ public class ProductService {
 	        return ResponseEntity.noContent().build();
 
 	    }
+	    @Transactional
 	    public Product updateProduct(int id, Product updatedProduct) {
 	      return productRepo.findById(id).map(product->{
 	         // product.setProdId(updatedProduct.getProdId());
 	          product.setProdName(updatedProduct.getProdName());
 	          product.setPrice(updatedProduct.getPrice());
 	          product.setCreationDate(updatedProduct.getCreationDate());
-	          product.setActive(updatedProduct.isActive());
+	          product.setisActive(updatedProduct.isActive());
 	          product.setLastUpdated(updatedProduct.getLastUpdated());
 	          return productRepo.save(product);
 	      }).orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
@@ -61,5 +62,11 @@ public class ProductService {
 	        }
 	        productRepo.deleteById(id);;
 	    }
+	    @Transactional
+		public List<Product> searchProducts(String keyword) {
+			// TODO Auto-generated method stub
+			return productRepo.searchProducts(keyword);
+		}
+	    
 
 }
