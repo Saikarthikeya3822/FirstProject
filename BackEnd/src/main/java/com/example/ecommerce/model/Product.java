@@ -28,8 +28,8 @@ public class Product {
         return isActive;
     }
 
-    public void setActive(boolean active) {
-        isActive = active;
+    public void setisActive(boolean isActive) {
+        this.isActive = isActive;
     }
 
     public Product(boolean isActive, LocalDateTime lastUpdated, LocalDateTime creationDate, BigDecimal price, String prodName, int prodId) {

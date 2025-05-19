@@ -50,6 +50,15 @@ public class ProdcutController {
 	    public ResponseEntity<String> deleteProduct(@PathVariable int id) {
 	        service.deleteProduct(id);
 	        return ResponseEntity.ok("Product deleted successfully");
+	        
 	    }
+	    @GetMapping("/products/search")
+	    public ResponseEntity<List<Product>> searchProducts(@RequestParam String keyword) {
+
+	        List<Product> products = service.searchProducts(keyword);
+	        System.out.println("searching with " + keyword);
+	        return new ResponseEntity<>(products, HttpStatus.OK);
+	    }
+	    
 
 }
