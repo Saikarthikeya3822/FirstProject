@@ -4,11 +4,15 @@ import { handleDelete,handleUpdate } from "../service/productService";
 
 
 const ProductList = ({ products, setProducts, loading, error,fetchProducts }) => {
+  // console.log("isActive value:", products.isActive);
+  // console.log("isActive type:", typeof products.isActive);
+  console.log("products", products);
   const [editProductId, setEditProductId] = useState(null);
   const [editedProduct, setEditedProduct] = useState({
     name: "",
     price: "",
     status: true,
+    creationDate:"",
   });
 
   // Handle edit button click
@@ -18,15 +22,28 @@ const ProductList = ({ products, setProducts, loading, error,fetchProducts }) =>
       name: product.prodName,
       price: product.price,
       status: product.isActive,
+      creationDate:product.creationDate,
     });
   };
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setEditedProduct((prev) => ({
-      ...prev,
-      [name]: name === "price" ? parseFloat(value) || 0 : value, // Ensure price is a number
-    }));
+    let processedValue = value;
+    if (name === "price") {
+    processedValue = parseFloat(value) || 0;
+  } else if (name === "creationDate" && value) {
+  const date = new Date(value);
+    if (!isNaN(date)) {
+      processedValue = date.toISOString();
+    } else {
+      console.warn("Invalid date value from input:", value);
+      processedValue = null;
+    }
+  }
+setEditedProduct((prev) => ({
+    ...prev,
+    [name]: processedValue,
+  }));
   };
 
   // Handle status toggle
@@ -47,7 +64,6 @@ const ProductList = ({ products, setProducts, loading, error,fetchProducts }) =>
     fetchProducts();
     setEditProductId(null); // Exit edit mode
   };
-
   return (
     <div>
       <h3 className="text-center mb-4">Product List</h3>
@@ -92,6 +108,14 @@ const ProductList = ({ products, setProducts, loading, error,fetchProducts }) =>
                         <option value="true">Active</option>
                         <option value="false">Inactive</option>
                       </select>
+
+                      <input
+                        type="datetime-local"
+                        name="creationDate"
+                        value={editedProduct.creationDate ? new Date(editedProduct.creationDate).toISOString().slice(0, 16) : ""}
+                        onChange={handleInputChange}
+                        className="form-control mb-2"
+                     />
                     </>
                   ) : (
                     <>
@@ -101,8 +125,12 @@ const ProductList = ({ products, setProducts, loading, error,fetchProducts }) =>
                       </p>
                       <p className="card-text">
                         <strong>Status:</strong>{" "}
-                        {product.isActive ? "Active" : "Inactive"}
+                        {product.isActive === "true" || product.isActive === true ? "Active" : "Inactive"}
                       </p>
+                      <p className="card-text">
+                        <strong>CreationDate:</strong> {product.creationDate}
+                      </p>
+
                       {product.imageData && (
                     <img
                     src={`data:${product.imageType};base64,${product.imageData}`}
