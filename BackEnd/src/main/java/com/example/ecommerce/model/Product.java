@@ -3,6 +3,8 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 @Entity
 @Table(name="product")
 public class Product {
@@ -14,7 +16,7 @@ public class Product {
     private String prodName;
 
     private BigDecimal price; // Use BigDecimal for monetary values
-
+    @Column(name = "creation_date") 
     private LocalDateTime creationDate;
 
     private LocalDateTime lastUpdated;
@@ -24,30 +26,20 @@ public class Product {
     @Lob
     private byte[] imageData;
 
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setisActive(boolean isActive) {
-        this.isActive = isActive;
-    }
-
     public Product(boolean isActive, LocalDateTime lastUpdated, LocalDateTime creationDate, BigDecimal price, String prodName, int prodId) {
-        this.isActive = isActive;
+        this.setActive(isActive);
         this.lastUpdated = lastUpdated;
         this.creationDate = creationDate;
         this.price = price;
         this.prodName = prodName;
         this.prodId = prodId;
     }
-
+    @Column(name = "is_active")
     private boolean isActive;
 
 
 
     public Product(){}
-
-
 
     public int getProdId() {
         return prodId;
@@ -111,6 +103,16 @@ public class Product {
 
 	public void setImageData(byte[] imageData) {
 		this.imageData = imageData;
+	}
+
+
+	@JsonProperty("isActive")
+	public boolean isActive() {
+		return isActive;
+	}
+	@JsonProperty("isActive")
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
 	}
 
 }

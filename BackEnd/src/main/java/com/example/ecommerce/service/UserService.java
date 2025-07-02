@@ -1,5 +1,7 @@
 package com.example.ecommerce.service;
 
+import javax.naming.AuthenticationException;
+
 import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,10 +28,12 @@ public class UserService {
         return user;
     }
 
-	public String verify(Users user) {
+	public String verify(Users user) throws AuthenticationException {
 		System.out.println("verifying user");
+		System.out.println(encoder.encode("admin123"));
 		org.springframework.security.core.Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
-		   if (authentication.isAuthenticated()) {
+		  
+		if (authentication.isAuthenticated()) {
 			   String token=jwtService.generateToken(user.getUsername());
 			   System.out.println("token is:"+ token);
 		         return jwtService.generateToken(user.getUsername())  ;

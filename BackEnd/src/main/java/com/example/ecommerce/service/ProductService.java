@@ -25,6 +25,7 @@ public class ProductService {
 	    }
 	    @Transactional
 	    public Product addProduct(Product product, MultipartFile imageFile) throws IOException {
+	    	
 	        product.setImageName(imageFile.getOriginalFilename());
 	        product.setImageType(imageFile.getContentType());
 	        product.setImageData(imageFile.getBytes());
@@ -47,11 +48,12 @@ public class ProductService {
 	    @Transactional
 	    public Product updateProduct(int id, Product updatedProduct) {
 	      return productRepo.findById(id).map(product->{
-	         // product.setProdId(updatedProduct.getProdId());
+	    	  System.out.println("Before update - Existing creationDate: " + product.getCreationDate());
+	          System.out.println("Incoming update - New creationDate: " + updatedProduct.getCreationDate());
 	          product.setProdName(updatedProduct.getProdName());
 	          product.setPrice(updatedProduct.getPrice());
 	          product.setCreationDate(updatedProduct.getCreationDate());
-	          product.setisActive(updatedProduct.isActive());
+	          product.setActive(updatedProduct.isActive());
 	          product.setLastUpdated(updatedProduct.getLastUpdated());
 	          return productRepo.save(product);
 	      }).orElseThrow(() -> new RuntimeException("Product not found with id: " + id));

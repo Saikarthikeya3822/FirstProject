@@ -43,6 +43,7 @@ public class ProdcutController {
 	    }
 	    @PutMapping("/updateproductbyid/{id}")
 	    public ResponseEntity<Product> updateProduct(@PathVariable int id, @RequestBody Product product) {
+	    	System.out.println("Received from frontend - creationDate: " + product.getCreationDate());
 	        Product updatedProduct = service.updateProduct(id, product);
 	        return ResponseEntity.ok(updatedProduct);
 	    }

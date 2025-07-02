@@ -28,6 +28,7 @@ public class UserController {
 	    @PostMapping("/login")
 	    public ResponseEntity<?> login(@RequestBody Users user) {
 	        try {
+	             System.out.println("inside the try block Status of Token:");
 	            String token = service.verify(user);
 	            // this returns token or "fail"
              System.out.println("Status of Token:"+token);
