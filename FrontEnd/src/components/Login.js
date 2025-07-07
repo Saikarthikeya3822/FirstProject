@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  console.log("Login.jsx is rendering");
     const navigate = useNavigate();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -26,8 +27,7 @@ const Login = () => {
   
         if (response.ok) {
           localStorage.setItem("token", data.token); // store JWT token
-          window.location.reload();
-          
+          console.log("Inside LoginPage");
           navigate("/home"); // redirect to HomePage
         } else {
           setError(data.message || "Login failed");

@@ -2,19 +2,20 @@ import axios from "axios";
 const UPDATE_URL = "http://localhost:8080/updateproductbyid";
 const DELETE_BY_ID_URL = "http://localhost:8080/deleteproductbyid";
 export const getProducts = async () => {
-  const token = localStorage.getItem("token"); // Get token from localStorage
-  console.log("Token from getproducts is:", token); // Debugging line to check token value
-  const response = await fetch("http://localhost:8080/products", {
-    headers: {
-      "Authorization": `Bearer ${token}`, // Send token in Authorization header
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch products.");
-  }
-
-  return response.json();
+  const token = localStorage.getItem("token");
+  // try {
+  // debugger
+    const response = await axios.get("http://localhost:8080/products", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  // } 
+  // catch (err) {
+  //   console.log("error in service",err)
+  //   throw err;
+  // }
 };
 
 export const saveProduct = async (product,image) => {

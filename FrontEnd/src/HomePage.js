@@ -4,34 +4,56 @@ import ProductForm from "./components/ProductForm";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { getProducts,deleteAllProducts } from "./service/productService";
 import './styles/HomePage.css';
-
+import { useNavigate } from "react-router-dom";
 const HomePage = () => {
   const [view, setView] = useState("view"); // Tracks the current view: "view" or "add"
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showSessionExpiredPopup, setShowSessionExpiredPopup] = useState(false);
+  const navigate = useNavigate();
+
+  const handleUnauthorized = () => {
+    debugger
+    console.log("Inside  handleUnauthorized");
+    localStorage.removeItem("token");
+    window.dispatchEvent(new Event("storage"));
+    setLoading(false);
+    setShowSessionExpiredPopup(true); // Show custom popup
+  };
+
+    const handleOkClick = () => {
+    debugger
+    console.log("Inside  handleOkClick");
+    setShowSessionExpiredPopup(false);
+    navigate("/"); // Navigate to LoginPage.jsx
+  };
+
+ useEffect(() => {
+  if (view === "view") {
+    fetchProducts();
+  }
+}, [view]);
 
   // Fetch products from the backend
   const fetchProducts = async () => {
+    debugger
     setLoading(true);
     setError(null);
     try {
       const data = await getProducts();
       setProducts(data);
     } catch (error) {
-      console.error("Error fetching products:", error);
-      setError("Failed to fetch products. Please try again later.");
-    } finally {
+      console.log("Status:", error.response?.status);
+    if (error.response && error.response.status === 401) {
+       handleUnauthorized();
+        return;
+    }
+    } 
+    finally {
       setLoading(false);
     }
   };
-
-  // Load products on component mount or when view changes to "view"
-  useEffect(() => {
-    if (view === "view") {
-      fetchProducts();
-    }
-  }, [view]);
 
   // Handle deletion of all products
   const handleDeleteAll = async () => {
@@ -86,6 +108,16 @@ const HomePage = () => {
           <ProductForm fetchProducts={fetchProducts} setView={setView} />
         )}
       </div>
+      {/* Session Expired Modal */}
+      {showSessionExpiredPopup && (
+      <div className="session-overlay">
+        <div className="session-popup">
+        <h3>Session Expired</h3>
+        <p>Please log in again.</p>
+      <button onClick={handleOkClick}>OK</button>
+        </div>
+    </div>
+)}
     </div>
   );
 };
