@@ -12,7 +12,7 @@ const HomePage = () => {
   const [error, setError] = useState(null);
   const [showSessionExpiredPopup, setShowSessionExpiredPopup] = useState(false);
   const navigate = useNavigate();
-
+  const role = localStorage.getItem("role");
   const handleUnauthorized = () => {
     debugger
     console.log("Inside  handleUnauthorized");
@@ -90,9 +90,11 @@ const HomePage = () => {
             >
               Add Product
             </button>
+            {role === "ADMIN" && (
             <button className="nav-link btn btn-danger" onClick={handleDeleteAll}>
               Delete All Products
             </button>
+)}
             
           </div>
         </div>

@@ -27,6 +27,7 @@ const Login = () => {
   
         if (response.ok) {
           localStorage.setItem("token", data.token); // store JWT token
+          localStorage.setItem("role", data.role);
           console.log("Inside LoginPage");
           navigate("/home"); // redirect to HomePage
         } else {
