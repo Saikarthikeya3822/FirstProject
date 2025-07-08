@@ -29,17 +29,16 @@ public class UserController {
 	    public ResponseEntity<?> login(@RequestBody Users user) {
 	        try {
 	             System.out.println("inside the try block Status of Token:");
-	            String token = service.verify(user);
+	             //String token = service.verify(user);
 	            // this returns token or "fail"
-             System.out.println("Status of Token:"+token);
-	            if (!"fail".equals(token)) {
-	                Map<String, String> response = new HashMap<>();
-	                response.put("token", token);
-	                return ResponseEntity.ok(response); // return token in JSON format
-	            } else {
-	                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-	                        .body(Map.of("message", "Invalid username or password"));
-	            }
+	         Map<String, String> result = service.verify(user);
+             //System.out.println("Status of Token:"+token);
+             if (!"fail".equals(result.get("status"))) {
+                 return ResponseEntity.ok(result);  // contains token + role
+             } else {
+                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                         .body(Map.of("message", "Invalid username or password"));
+             }
 
 	        } catch (Exception e) {
 	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

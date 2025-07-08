@@ -1,5 +1,8 @@
 package com.example.ecommerce.service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.naming.AuthenticationException;
 
 import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
@@ -28,17 +31,23 @@ public class UserService {
         return user;
     }
 
-	public String verify(Users user) throws AuthenticationException {
+	public  Map<String, String> verify(Users user) throws AuthenticationException {
 		System.out.println("verifying user");
-		System.out.println(encoder.encode("admin123"));
+		//System.out.println(encoder.encode("admin123"));
+		System.out.println(encoder.encode("johnpass"));
 		org.springframework.security.core.Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
 		  
 		if (authentication.isAuthenticated()) {
 			   String token=jwtService.generateToken(user.getUsername());
+			   Users dbUser = repo.findByUsername(user.getUsername());
+               Map<String, String> result = new HashMap<>();
 			   System.out.println("token is:"+ token);
-		         return jwtService.generateToken(user.getUsername())  ;
+			   result.put("token", token);
+		        result.put("role", dbUser.getRole());
+		        return result;
+		        //return jwtService.generateToken(user.getUsername())  ;
 		        } else {
-		            return "fail";
+		        	 return Map.of("status", "fail");
 		        }
 	}
     
