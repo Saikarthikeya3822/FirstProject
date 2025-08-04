@@ -40,8 +40,10 @@ const Login = () => {
     };
   
     return (
-      <div className="container mt-5" style={{ maxWidth: "400px" }}>
-        <h2 className="mb-4 text-center">Login</h2>
+    <div className="container mt-5 d-flex justify-content-center">
+      <div className="card shadow" style={{ width: "100%", maxWidth: "400px" }}>
+        <div className="card-body">
+          <h3 className="card-title text-center mb-4">Login</h3>
         {error && <div className="alert alert-danger">{error}</div>}
         <form onSubmit={handleLogin}>
           <div className="form-group mb-3">
@@ -67,8 +69,17 @@ const Login = () => {
           <button type="submit" className="btn btn-primary w-100">
             Login
           </button>
+          <a href="http://localhost:8080/oauth2/authorization/google">
+          <button type="button" className="btn btn-danger w-100">
+          Sign in with Google
+         </button>
+          </a>
+
         </form>
+        
       </div>
+      </div>
+    </div>
     );
   };
 

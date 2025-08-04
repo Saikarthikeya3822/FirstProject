@@ -1,21 +1,37 @@
 import axios from "axios";
 const UPDATE_URL = "http://localhost:8080/updateproductbyid";
 const DELETE_BY_ID_URL = "http://localhost:8080/deleteproductbyid";
-export const getProducts = async () => {
+
+export const registerUser = async (userData) => {
+  console.log("Data:",userData,JSON.stringify(userData));
+  const response = await fetch("http://localhost:8080/register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(userData),
+  });
+console.log("Response is:",response);
+  if (response.status===409) {
+    console.log("Inside 409 status");
+    const error =  response.json(); // extract error message
+    throw new Error(error.message || "Registration failed");
+  }
+
+  return  response.json();//response.json(); // return saved user
+};
+
+export const getProducts  = async () => {
   const token = localStorage.getItem("token");
   // try {
   // debugger
+  console.log("token",token)
     const response = await axios.get("http://localhost:8080/products", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
     return response.data;
-  // } 
-  // catch (err) {
-  //   console.log("error in service",err)
-  //   throw err;
-  // }
 };
 
 export const saveProduct = async (product,image) => {

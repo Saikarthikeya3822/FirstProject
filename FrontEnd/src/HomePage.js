@@ -11,11 +11,17 @@ const HomePage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showSessionExpiredPopup, setShowSessionExpiredPopup] = useState(false);
+  const[showNoAcessPopup,setshowNoAcessPopup]=useState(false);
   const navigate = useNavigate();
   const role = localStorage.getItem("role");
   const handleUnauthorized = () => {
-    debugger
+    // debugger
     console.log("Inside  handleUnauthorized");
+    if(localStorage.getItem('token')===null){
+    window.dispatchEvent(new Event("storage"));
+    setLoading(false);
+    setshowNoAcessPopup(true); // Show custom popup
+    }
     localStorage.removeItem("token");
     window.dispatchEvent(new Event("storage"));
     setLoading(false);
@@ -26,29 +32,28 @@ const HomePage = () => {
     debugger
     console.log("Inside  handleOkClick");
     setShowSessionExpiredPopup(false);
+    setshowNoAcessPopup(false);
     navigate("/"); // Navigate to LoginPage.jsx
   };
 
  useEffect(() => {
+  console.log("Inside the Use effect");
   if (view === "view") {
     fetchProducts();
+   handleUnauthorized();
   }
 }, [view]);
 
   // Fetch products from the backend
   const fetchProducts = async () => {
-    debugger
+    // debugger
     setLoading(true);
     setError(null);
     try {
       const data = await getProducts();
       setProducts(data);
     } catch (error) {
-      console.log("Status:", error.response?.status);
-    if (error.response && error.response.status === 401) {
-       handleUnauthorized();
-        return;
-    }
+      handleUnauthorized();
     } 
     finally {
       setLoading(false);
@@ -94,8 +99,7 @@ const HomePage = () => {
             <button className="nav-link btn btn-danger" onClick={handleDeleteAll}>
               Delete All Products
             </button>
-)}
-            
+             )}            
           </div>
         </div>
       </nav>
@@ -118,8 +122,20 @@ const HomePage = () => {
         <p>Please log in again.</p>
       <button onClick={handleOkClick}>OK</button>
         </div>
+        
     </div>
 )}
+    {showNoAcessPopup && (
+      <div className="session-overlay">
+        <div className="session-popup">
+        <h3>UnAuthorized Access</h3>
+        <p>Please log in again.</p>
+      <button onClick={handleOkClick}>OK</button>
+        </div>
+        
+    </div>
+)}
+    
     </div>
   );
 };
