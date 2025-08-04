@@ -20,11 +20,17 @@ public class UserController {
 	    private UserService service;
 
 
-	    @PostMapping("/register")
-	    public Users register(@RequestBody Users user) {
-	        return service.register(user);
+	 @PostMapping("/register")
+	 public ResponseEntity<?> register(@RequestBody Users user) {
+	     try {
+	         Users savedUser = service.register(user);
+	         return ResponseEntity.ok(Map.of("message", "User registered successfully"));
+	     } catch (RuntimeException e) {
+	         return ResponseEntity.status(HttpStatus.CONFLICT)
+	                 .body(Map.of("message", e.getMessage()));
+	     }
+	 }
 
-	    }
 	    @PostMapping("/login")
 	    public ResponseEntity<?> login(@RequestBody Users user) {
 	        try {

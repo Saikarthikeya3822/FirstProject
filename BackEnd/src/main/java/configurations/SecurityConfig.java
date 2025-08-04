@@ -31,20 +31,32 @@ public class SecurityConfig {
 
     @Autowired
     private UserDetailsService userDetailsService;
-
+    @Autowired
+    private CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     	System.out.println("✅ SecurityFilterChain is being built...");
-    	return http.cors(Customizer.withDefaults()) 
-    			.csrf(customizer -> customizer.disable())
-    		    .authorizeHttpRequests(request -> request
-    		     .requestMatchers("/login", "/register").permitAll()
-    		     .anyRequest().authenticated())
-    		    .httpBasic(Customizer.withDefaults())
-    		    .formLogin(AbstractHttpConfigurer::disable) // ✅ this is important
-    		    .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-    		    .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-    		    .build();
+    	 http
+         .cors(Customizer.withDefaults())
+         .csrf(AbstractHttpConfigurer::disable)
+         .authorizeHttpRequests(request -> request
+             .requestMatchers("/login", "/register").permitAll()
+             .anyRequest().authenticated()
+         )
+         .oauth2Login(oauth -> oauth
+        		    .successHandler((request, response, authentication) -> {
+        		        customOAuth2SuccessHandler.onAuthenticationSuccess(request, response, authentication);
+        		    })
+        		)
+
+         .httpBasic(Customizer.withDefaults())
+         .formLogin(AbstractHttpConfigurer::disable)
+         .sessionManagement(session -> session
+             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+         )
+         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+     return http.build();
 
 
     }

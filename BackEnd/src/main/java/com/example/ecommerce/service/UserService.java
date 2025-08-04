@@ -25,16 +25,30 @@ public class UserService {
 	 AuthenticationManager authManager;
 	private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
-    public Users register(Users user) {
-        user.setPassword(encoder.encode(user.getPassword()));
-        repo.save(user);
-        return user;
-    }
+	public Users register(Users user) {
+	    // Check if username already exists in the database
+	    Users existingUser = repo.findByUsername(user.getUsername());
+
+	    if (existingUser != null) {
+	        throw new RuntimeException("Username already exists.");
+	    }
+	    if (user.getRole() == null || user.getRole().isEmpty()) {
+	        user.setRole("USER"); // apply default if not provided
+	    }
+
+	    // Encode the password before saving
+	    user.setPassword(encoder.encode(user.getPassword()));
+
+	    // Save new user
+	    return repo.save(user);
+	}
+
 
 	public  Map<String, String> verify(Users user) throws AuthenticationException {
 		System.out.println("verifying user");
 		//System.out.println(encoder.encode("admin123"));
-		System.out.println(encoder.encode("johnpass"));
+		//System.out.println(encoder.encode("johnpass"));
+		//alice@12
 		org.springframework.security.core.Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
 		  
 		if (authentication.isAuthenticated()) {
