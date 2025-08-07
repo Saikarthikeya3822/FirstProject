@@ -14,7 +14,16 @@ const ProductList = ({ products, setProducts, loading, error,fetchProducts }) =>
     status: true,
     creationDate:"",
   });
-
+const [currentPage, setCurrentPage] = useState(1);
+const [postsPerPage, setPostsPerPage] = useState(2);
+const totalPosts=products.length;
+const lastPostIndex = currentPage * postsPerPage;
+const firstPostIndex = lastPostIndex - postsPerPage;
+const currentPosts = products.slice(firstPostIndex, lastPostIndex);
+let pages = [];
+    for (let i = 1; i <= Math.ceil(totalPosts / postsPerPage); i++) {
+        pages.push(i);
+    }
   // Handle edit button click
   const handleEditClick = (product) => {
     setEditProductId(product.prodId);
@@ -77,7 +86,7 @@ setEditedProduct((prev) => ({
         <p className="text-center text-danger">{error}</p>
       ) : products.length > 0 ? (
         <div className="row">
-          {products.map((product) => (
+          {currentPosts.map((product) => (
             <div key={product.prodId} className="col-md-4 mb-3">
               <div className="card shadow-sm">
                 <div className="card-body">
@@ -167,6 +176,18 @@ setEditedProduct((prev) => ({
               </div>
             </div>
           ))}
+            <div className='pagination'>
+            {pages.map((page, index) => {
+                return (
+                    <button
+                        key={index}
+                        onClick={() => setCurrentPage(page)}
+                        className={page == currentPage ? "active" : ""}>
+                        {page}
+                    </button>
+                );
+            })}
+        </div>
         </div>
       ) : (
         <p className="text-center text-muted">No products available</p>
