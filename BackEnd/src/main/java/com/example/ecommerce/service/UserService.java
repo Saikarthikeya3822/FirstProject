@@ -57,7 +57,10 @@ public class UserService {
                Map<String, String> result = new HashMap<>();
 			   System.out.println("token is:"+ token);
 			   result.put("token", token);
-		        result.put("role", dbUser.getRole());
+		       result.put("role", dbUser.getRole());
+		       result.put("userId", String.valueOf(dbUser.getId()));
+		       result.put("userName", String.valueOf(dbUser.getUsername()));
+		        
 		        return result;
 		        //return jwtService.generateToken(user.getUsername())  ;
 		        } else {

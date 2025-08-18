@@ -43,11 +43,11 @@ public class SecurityConfig {
              .requestMatchers("/login", "/register").permitAll()
              .anyRequest().authenticated()
          )
-         .oauth2Login(oauth -> oauth
-        		    .successHandler((request, response, authentication) -> {
-        		        customOAuth2SuccessHandler.onAuthenticationSuccess(request, response, authentication);
-        		    })
-        		)
+//         .oauth2Login(oauth -> oauth
+//        		    .successHandler((request, response, authentication) -> {
+//        		        customOAuth2SuccessHandler.onAuthenticationSuccess(request, response, authentication);
+//        		    })
+//        		)
 
          .httpBasic(Customizer.withDefaults())
          .formLogin(AbstractHttpConfigurer::disable)
