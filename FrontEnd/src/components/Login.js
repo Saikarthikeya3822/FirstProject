@@ -24,10 +24,12 @@ const Login = () => {
   
         const data = await response.json();
         console.log("Login response:", data);
-  
+      
         if (response.ok) {
           localStorage.setItem("token", data.token); // store JWT token
           localStorage.setItem("role", data.role);
+          localStorage.setItem("userId",data.userId);
+          localStorage.setItem("userName",data.userName);
           console.log("Inside LoginPage");
           navigate("/home"); // redirect to HomePage
         } else {
@@ -69,11 +71,11 @@ const Login = () => {
           <button type="submit" className="btn btn-primary w-100">
             Login
           </button>
-          <a href="http://localhost:8080/oauth2/authorization/google">
+          {/* <a href="http://localhost:8080/oauth2/authorization/google">
           <button type="button" className="btn btn-danger w-100">
           Sign in with Google
          </button>
-          </a>
+          </a> */}
 
         </form>
         

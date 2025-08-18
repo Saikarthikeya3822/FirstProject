@@ -20,6 +20,17 @@ console.log("Response is:",response);
 
   return  response.json();//response.json(); // return saved user
 };
+export const fetchCartItems = async () => {
+  const token = localStorage.getItem("token");
+  const id=localStorage.getItem("userId");
+  console.log("token in cart:",token);
+  console.log("id is",id)
+  const res = await axios.get(`http://localhost:8080/cart/${id}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  
+    return res.data;
+};
 
 export const getProducts  = async () => {
   const token = localStorage.getItem("token");
@@ -58,6 +69,18 @@ export const saveProduct = async (product,image) => {
 
     return response.json();
 };
+
+export const addCart = async (formData) => {
+  const token = localStorage.getItem("token"); // make sure your token key matches
+
+  return axios.post("http://localhost:8080/cart/addCart", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      "Authorization": `Bearer ${token}`
+    }
+  });
+};
+
 
 
   
@@ -123,3 +146,6 @@ export const saveProduct = async (product,image) => {
       //console.error(new Error('Whoops, something bad happened'));
     }
   };
+
+
+
