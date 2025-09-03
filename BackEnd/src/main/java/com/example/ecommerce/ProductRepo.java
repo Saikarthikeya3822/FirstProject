@@ -21,5 +21,18 @@ public interface ProductRepo extends JpaRepository<Product,Integer> {
 		       "('inactive' LIKE LOWER(CONCAT(:keyword, '%')) AND p.isActive = false)")
 
 		List<Product> searchProducts(@Param("keyword") String keyword);
+	
+	@Query("SELECT p FROM Product p " +
+		       "WHERE (:status = '' OR " +
+		       "(LOWER(:status) IN ('active','true') AND p.isActive = true) OR " +
+		       "(LOWER(:status) IN ('inactive','false') AND p.isActive = false)) " +
+		       "ORDER BY " +
+		       "CASE WHEN :priceRange = 'low' THEN p.price END ASC, " +
+		       "CASE WHEN :priceRange = 'high' THEN p.price END DESC")
+		List<Product> filterProducts(@Param("status") String status,
+		                             @Param("priceRange") String priceRange);
+
+
+
 
 }

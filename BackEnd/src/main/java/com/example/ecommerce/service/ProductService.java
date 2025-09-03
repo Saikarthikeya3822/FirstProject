@@ -69,6 +69,13 @@ public class ProductService {
 			// TODO Auto-generated method stub
 			return productRepo.searchProducts(keyword);
 		}
-	    
-
+//	    public List<Product> filterProducts(String status, String price) {
+//	        return productRepo.filterProducts(status, price);
+//	    }
+	    @Transactional
+		public List<Product> filterProducts(String status, String price) {
+			// TODO Auto-generated method stub
+			return productRepo.filterProducts(status, price);
+	    }
+		
 }

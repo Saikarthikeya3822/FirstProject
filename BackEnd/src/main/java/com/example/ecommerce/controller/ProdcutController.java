@@ -60,6 +60,12 @@ public class ProdcutController {
 	        System.out.println("searching with " + keyword);
 	        return new ResponseEntity<>(products, HttpStatus.OK);
 	    }
+	    @GetMapping("/products/filter")
+	    public ResponseEntity<List<Product>> filterProducts(
+	            @RequestParam(required = false) String status,
+	            @RequestParam(required = false) String price) {
+	        return ResponseEntity.ok(service.filterProducts(status, price));
+	    }
 	    
 
 }
