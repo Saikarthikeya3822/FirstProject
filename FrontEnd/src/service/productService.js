@@ -31,11 +31,23 @@ export const fetchCartItems = async () => {
   
     return res.data;
 };
+//Filter Function
+export const filterFetchProducts = async (status, price) => {
+  debugger
+  const token = localStorage.getItem("token");
+  const response = await axios.get("http://localhost:8080/products/filter", {
+    params: { status, price },   // 🔑 axios handles query params cleanly
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  console.log("Inside filterFetchProducts data:",response.data)
+  return response.data; // return, don’t set state here
+};
+
 
 export const getProducts  = async () => {
   const token = localStorage.getItem("token");
-  // try {
-  // debugger
   console.log("token",token)
     const response = await axios.get("http://localhost:8080/products", {
       headers: {
