@@ -28,8 +28,6 @@ public class SecurityConfig {
 
     @Autowired
     private UserDetailsService userDetailsService;
-    @Autowired
-    private CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     	System.out.println("✅ SecurityFilterChain is being built...");

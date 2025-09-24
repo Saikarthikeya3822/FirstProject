@@ -14,13 +14,13 @@ const RegistrationPage = () => {
     alert("Registration successful! You can now log in.");
     setUsername("");
     setPassword("");
-    navigate("/login"); // redirect to login
+    navigate("/"); // redirect to login
   } catch (error) {
     console.log("error message",error.message);
-    if (error.message.includes("Registration failed")) {
+    if (error.message.includes("User already exists")) {
       alert("User is already registered. Please login.");
     } else {
-      alert("Something went wrong. Try again.");
+      alert("Something went wrong in KeyCloak Authentication. Try again.");
     } 
   }
     //✅ Clear fields after registration

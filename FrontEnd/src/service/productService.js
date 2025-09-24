@@ -11,13 +11,15 @@ export const registerUser = async (userData) => {
     },
     body: JSON.stringify(userData),
   });
-console.log("Response is:",response);
+  console.log("Response is:",response);
   if (response.status===409) {
     console.log("Inside 409 status");
     const error =  response.json(); // extract error message
-    throw new Error(error.message || "Registration failed");
+    throw new Error(error.message || "User already exists.");
   }
-
+  else if(response.status===500){
+    throw new Error("Registration failed due to a server error in Keycloak Authentication. Please try again later.");
+  }
   return  response.json();//response.json(); // return saved user
 };
 export const fetchCartItems = async () => {
@@ -28,7 +30,7 @@ export const fetchCartItems = async () => {
   const res = await axios.get(`http://localhost:8080/cart/${id}`, {
     headers: { Authorization: `Bearer ${token}` }
   });
-  
+    console.log("data from cart table",res.data);
     return res.data;
 };
 //Filter Function
