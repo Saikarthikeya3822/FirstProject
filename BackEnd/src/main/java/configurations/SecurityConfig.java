@@ -27,9 +27,6 @@ public class SecurityConfig {
 	    }
 
     @Autowired
-    private JwtFilter jwtFilter;
-
-    @Autowired
     private UserDetailsService userDetailsService;
     @Autowired
     private CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
@@ -43,43 +40,19 @@ public class SecurityConfig {
              .requestMatchers("/login", "/register").permitAll()
              .anyRequest().authenticated()
          )
-//         .oauth2Login(oauth -> oauth
-//        		    .successHandler((request, response, authentication) -> {
-//        		        customOAuth2SuccessHandler.onAuthenticationSuccess(request, response, authentication);
-//        		    })
-//        		)
-
+         .oauth2ResourceServer(oauth2 -> oauth2
+                 .jwt(Customizer.withDefaults()) // Use the new API for JWT configuration
+             )
          .httpBasic(Customizer.withDefaults())
          .formLogin(AbstractHttpConfigurer::disable)
          .sessionManagement(session -> session
              .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-         )
-         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+         );
 
      return http.build();
 
 
     }
-
-
-//    @Bean
-//    public UserDetailsService userDetailsService() {
-//
-//        UserDetails user1 = User
-//                .withDefaultPasswordEncoder()
-//                .username("kiran")
-//                .password("k@123")
-//                .roles("USER")
-//                .build();
-//
-//        UserDetails user2 = User
-//                .withDefaultPasswordEncoder()
-//                .username("harsh")
-//                .password("h@123")
-//                .roles("ADMIN")
-//                .build();
-//        return new InMemoryUserDetailsManager(user1, user2);
-//    }
 
     @Bean
     public AuthenticationProvider authenticationProvider() {

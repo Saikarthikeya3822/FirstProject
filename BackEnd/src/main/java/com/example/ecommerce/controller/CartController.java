@@ -1,6 +1,7 @@
 package com.example.ecommerce.controller;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -46,7 +47,7 @@ public class CartController {
 
     // View cart by user
     @GetMapping("cart/{userId}")
-    public ResponseEntity<List<Cart>> viewCart(@PathVariable Long userId) {
+    public ResponseEntity<List<Cart>> viewCart(@PathVariable UUID userId) {
          System.out.println("Hitting get controller");
         List<Cart> cartItems = cartService.getCartByUser(userId);
         return ResponseEntity.ok(cartItems);

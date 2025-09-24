@@ -1,6 +1,6 @@
 package com.example.ecommerce.service;
-
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,7 +24,7 @@ public class CartService {
         return cartRepository.save(cart);
     }
     @Transactional   // 👈 This makes sure autoCommit=false
-    public List<Cart> getCartByUser(Long userId) {
+    public List<Cart> getCartByUser(UUID  userId) {
         return cartRepository.findByUserId(userId);
     }
 }

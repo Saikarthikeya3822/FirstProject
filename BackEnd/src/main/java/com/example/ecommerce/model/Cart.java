@@ -1,5 +1,7 @@
 package com.example.ecommerce.model;
 
+import java.util.UUID;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -38,7 +40,7 @@ public class Cart {
 	public Cart() {
 		
 	}
-    public Cart(Long cartId, Long userId, String username, Long prodId, String prodName, Double price) {
+    public Cart(Long cartId, UUID  userId, String username, Long prodId, String prodName, Double price) {
 		super();
 		this.cartId = cartId;
 		this.userId = userId;
@@ -47,7 +49,7 @@ public class Cart {
 		this.prodName = prodName;
 		this.price = price;
 	}
-	private Long userId;
+	private UUID  userId;
     private String username;
 
     private Long prodId;
@@ -57,10 +59,10 @@ public class Cart {
 	public void setCartId(Long cartId) {
 		this.cartId = cartId;
 	}
-	public Long getUserId() {
+	public UUID  getUserId() {
 		return userId;
 	}
-	public void setUserId(Long userId) {
+	public void setUserId(UUID  userId) {
 		this.userId = userId;
 	}
 	public String getUsername() {
