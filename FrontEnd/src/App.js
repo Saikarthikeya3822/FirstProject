@@ -2,7 +2,6 @@ import './App.css';
 import HomePage from './HomePage';
 import EntryPage from './components/EntryPage';
 import RegistrationPage from './components/RegistrationPage';
-import OAuth2Success from './components/OAuth2Success';
 import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
 
@@ -41,7 +40,6 @@ function App() {
         <Route path="/home" element={<HomePage />} />
         <Route path="/" element={<EntryPage />} />
         <Route path="/register" element={<RegistrationPage />} />
-        <Route path="/oauth2/success" element={<OAuth2Success />} />
       </Routes>
     </Router>
   );

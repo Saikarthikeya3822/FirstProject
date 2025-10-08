@@ -1,4 +1,5 @@
 import axios from "axios";
+import api from '../Utils/api.js'
 const UPDATE_URL = "http://localhost:8080/updateproductbyid";
 const DELETE_BY_ID_URL = "http://localhost:8080/deleteproductbyid";
 
@@ -49,13 +50,14 @@ export const filterFetchProducts = async (status, price) => {
 
 
 export const getProducts  = async () => {
-  const token = localStorage.getItem("token");
-  console.log("token",token)
-    const response = await axios.get("http://localhost:8080/products", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+  // const token = localStorage.getItem("token");
+  // console.log("token",token)
+  //   const response = await axios.get("http://localhost:8080/products", {
+  //     headers: {
+  //       Authorization: `Bearer ${token}`,
+  //     },
+  //   });
+  const response = await api.get("/products");
     return response.data;
 };
 

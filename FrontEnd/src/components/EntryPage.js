@@ -25,13 +25,18 @@ const EntryPage = () => {
    const handleKeycloakLogin = () => {
     // This will redirect to the Keycloak login page, where users can
     // enter their credentials or choose a social provider.
+    alert('inside handle login')
     keycloak.login()
       .then(() => {
+        // alert('keycloak',keycloak)
+        // debugger
         if (keycloak.authenticated) {
           console.log("Keycloak login success:", keycloak.token);
         }
       })
-      .catch(err => console.error("Keycloak login failed:", err));
+      .catch(err => {
+        // alert('alert mesg error')
+        console.error("Keycloak login failed:", err)});
   };
 
   const handleGoogleLogin = () => {
