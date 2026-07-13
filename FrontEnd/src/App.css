@@ -7,6 +7,12 @@
   pointer-events: none;
 }
 
+.p-cascadeselect-panel{
+  margin-bottom: 0px;
+  padding: 0px;
+}
+
+
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;

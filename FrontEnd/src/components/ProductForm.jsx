@@ -42,7 +42,7 @@ const ProductForm = ({ fetchProducts, setView }) => {
       console.log("Submitting file:",image); // Ensure it's a File object
       await saveProduct(product,image); // Save product to the backend
       alert("Product saved successfully.");
-      fetchProducts(); // Refresh the product list
+      //fetchProducts(); // Refresh the product list
       setView("view"); // Switch back to the "View Products" view
     } catch (error) {
       console.error("Error saving product:", error);

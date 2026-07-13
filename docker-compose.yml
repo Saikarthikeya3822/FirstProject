@@ -1,0 +1,271 @@
+services:
+
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: rag-postgres
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: ragdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ecommerce-network
+
+  redis:
+    image: redis:latest
+    container_name: redis-memory
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - ecommerce-network
+
+  config-server:
+    image: config-server:1.0
+    container_name: config-server
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    networks:
+      - ecommerce-network
+
+  eureka-server:
+    image: eureka-server:1.0
+    container_name: eureka-server
+    restart: unless-stopped
+    ports:
+      - "8761:8761"
+    depends_on:
+      - config-server
+    environment:
+      CONFIG_SERVER_URL: http://config-server:8888
+    networks:
+      - ecommerce-network
+
+  ai-service:
+    image: ai-service:1.0
+    container_name: ai-service
+    restart: unless-stopped
+    ports:
+      - "8087:8087"
+    depends_on:
+      - postgres
+      - redis
+      - config-server
+      - eureka-server
+    environment:
+      SERVER_PORT: "8087"
+      SPRING_APPLICATION_NAME: ai-service
+      CONFIG_SERVER_URL: http://config-server:8888
+      EUREKA_SERVER: http://eureka-server:8761/eureka/
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GOOGLE_EMBEDDING_API_KEY: ${GOOGLE_EMBEDDING_API_KEY}
+      DB_URL: jdbc:postgresql://postgres:5432/ragdb
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/Ecommerce-Users
+    networks:
+      - ecommerce-network
+
+  user-service:
+    image: user-service:1.0
+    container_name: user-service
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres
+      - config-server
+      - eureka-server
+    environment:
+      SERVER_PORT: "8081"
+      SPRING_APPLICATION_NAME: user-service
+      CONFIG_SERVER_URL: http://config-server:8888
+      EUREKA_SERVER: http://eureka-server:8761/eureka/
+      DB_URL: jdbc:postgresql://postgres:5432/user_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/Ecommerce-Users
+    networks:
+      - ecommerce-network
+
+  cart-service:
+    image: cart-service:1.0
+    container_name: cart-service
+    restart: unless-stopped
+    ports:
+      - "8084:8084"
+    depends_on:
+      - postgres
+      - config-server
+      - eureka-server
+    environment:
+      SERVER_PORT: "8084"
+      SPRING_APPLICATION_NAME: cart-service
+
+      CONFIG_SERVER_URL: http://config-server:8888
+
+      EUREKA_SERVER: http://eureka-server:8761/eureka/
+
+      DB_URL: jdbc:postgresql://postgres:5432/cart_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/Ecommerce-Users
+    networks:
+      - ecommerce-network
+
+  order-service:
+    image: order-service:1.0
+    container_name: order-service
+    restart: unless-stopped
+
+    ports:
+      - "8085:8085"
+
+    depends_on:
+      - postgres
+      - config-server
+      - eureka-server
+
+    environment:
+      SERVER_PORT: "8085"
+      SPRING_APPLICATION_NAME: order-service
+
+      CONFIG_SERVER_URL: http://config-server:8888
+
+      EUREKA_SERVER: http://eureka-server:8761/eureka/
+
+      DB_URL: jdbc:postgresql://postgres:5432/order_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/Ecommerce-Users
+
+    networks:
+      - ecommerce-network
+
+  product-service:
+    image: product-service:1.0
+    container_name: product-service
+    restart: unless-stopped
+
+    ports:
+      - "8083:8083"
+
+    depends_on:
+      - postgres
+      - config-server
+      - eureka-server
+
+    environment:
+      SERVER_PORT: "8083"
+      SPRING_APPLICATION_NAME: product-service
+
+      CONFIG_SERVER_URL: http://config-server:8888
+
+      EUREKA_SERVER: http://eureka-server:8761/eureka/
+
+      DB_URL: jdbc:postgresql://postgres:5432/product_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/Ecommerce-Users
+
+    networks:
+      - ecommerce-network
+
+  user-activity-service:
+    image: user-activity-service:1.0
+    container_name: user-activity-service
+    restart: unless-stopped
+
+    ports:
+      - "8086:8086"
+
+    depends_on:
+      - postgres
+      - config-server
+      - eureka-server
+
+    environment:
+      SERVER_PORT: "8086"
+      SPRING_APPLICATION_NAME: user-activity-service
+
+      CONFIG_SERVER_URL: http://config-server:8888
+
+      EUREKA_SERVER: http://eureka-server:8761/eureka/
+
+      DB_URL: jdbc:postgresql://postgres:5432/useractivity_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/Ecommerce-Users
+
+    networks:
+      - ecommerce-network
+gateway-service:
+  image: gateway-service:1.0
+  container_name: gateway-service
+  restart: unless-stopped
+
+  ports:
+    - "8080:8080"
+
+  depends_on:
+    - config-server
+    - eureka-server
+
+  environment:
+    SERVER_PORT: "8080"
+    SPRING_APPLICATION_NAME: api-gateway
+    CONFIG_SERVER_URL: http://config-server:8888
+    EUREKA_SERVER: http://eureka-server:8761/eureka/
+
+  networks:
+    - ecommerce-network
+keycloak:
+  image: quay.io/keycloak/keycloak:26.3.4
+  container_name: keycloak
+  restart: unless-stopped
+
+  ports:
+    - "9090:8080"
+
+  environment:
+    KEYCLOAK_ADMIN: admin
+    KEYCLOAK_ADMIN_PASSWORD: admin
+
+  command: start-dev
+
+  depends_on:
+    - postgres
+
+  networks:
+    - ecommerce-network
+frontend:
+  image: ecommerce-frontend:1.0
+  container_name: ecommerce-frontend
+  restart: unless-stopped
+
+  ports:
+    - "3000:80"
+
+  depends_on:
+    - gateway-service
+
+  networks:
+    - ecommerce-network      
+
+networks:
+  ecommerce-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

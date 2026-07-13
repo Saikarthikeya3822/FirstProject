@@ -22,7 +22,13 @@ const CartList = () => {
         setCartItems(data);
       } catch (err) {
         setError("Failed to load cart items.");
-        handleUnauthorized();
+        handleUnauthorized(err); 
+        
+        // Add a generic error message for other errors
+        if (err.message !== "SESSION_EXPIRED_LOGOUT") {
+           // Avoid showing error if the interceptor is handling the full logout
+           setError(err.message || "Failed to load data."); 
+        }
       } finally {
         setLoading(false);
       }
@@ -47,7 +53,7 @@ const CartList = () => {
               <div className="card shadow-sm p-3 d-flex flex-row align-items-center">
                 {/* Image */}
                 <img
-                 src={`data:${item.imageType};base64,${item.imageData}`}
+                 src={`http://localhost:8083${item.imageUrl}`}
                   alt={item.name}
                   className="rounded me-3"
                   style={{ width: "120px", height: "120px", objectFit: "cover" }}
@@ -55,12 +61,12 @@ const CartList = () => {
 
                 {/* Content */}
                 <div className="flex-grow-1">
-                  <h5 className="card-title">{item.prodName}</h5>
+                  <h5 className="card-title">{item.productName}</h5>
                   {/* //<p className="card-text text-muted">{item.description}</p> */}
-                  <p className="fw-bold">₹{item.price}</p>
+                  <p className="fw-bold">₹{item.quantity * item.price}</p>
+                   <p className="fw-bold">Qty: {item.quantity || 1}</p>
                 </div>
-
-                {/* Quantity & Remove Button */}
+                {/* Remove Button */}
                 <div className="text-end">
                  {/* //<p className="mb-2">Qty: {item.quantity || 1}</p> */}
                   <button className="btn btn-sm btn-danger">Remove</button>
