@@ -1,0 +1,283 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: rag-postgres
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - ecommerce-network
+
+  redis:
+    image: redis:latest
+    container_name: redis-memory
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - ecommerce-network
+
+  config-server:
+    image: karthik11946/config-server:latest
+    container_name: config-server
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    networks:
+      - ecommerce-network
+
+  eureka-server:
+    image: karthik11946/eureka-server:latest
+    container_name: eureka-server
+    restart: unless-stopped
+    ports:
+      - "8761:8761"
+    depends_on:
+      - config-server
+    environment:
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL}
+    networks:
+      - ecommerce-network
+
+  ai-service:
+    image: karthik11946/ai-service:latest
+    container_name: ai-service
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - redis
+      - config-server
+      - eureka-server
+    environment:
+      SERVER_PORT: "8087"
+      SPRING_APPLICATION_NAME: ai-service
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL}
+      EUREKA_SERVER: ${EUREKA_SERVER} 
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GOOGLE_EMBEDDING_API_KEY: ${GOOGLE_EMBEDDING_API_KEY}
+      DB_URL: jdbc:postgresql://postgres:5432/ragdb
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      KEYCLOAK_JWK_SET_URI: ${KEYCLOAK_JWK_SET_URI}
+      KEYCLOAK_ISSUER: ${KEYCLOAK_ISSUER}
+    networks:
+      - ecommerce-network
+
+  user-service:
+    image: karthik11946/user-service:latest
+    container_name: user-service
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - config-server
+      - eureka-server
+    environment:
+      SERVER_PORT: "8081"
+      SPRING_APPLICATION_NAME: user-service
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL}
+      EUREKA_SERVER: ${EUREKA_SERVER}
+      DB_URL: jdbc:postgresql://postgres:5432/user_db
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      KEYCLOAK_JWK_SET_URI: ${KEYCLOAK_JWK_SET_URI} 
+      KEYCLOAK_ISSUER: ${KEYCLOAK_ISSUER}
+    networks:
+      - ecommerce-network
+
+  cart-service:
+    image: karthik11946/cart-service:latest
+    container_name: cart-service
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - config-server
+      - eureka-server
+    environment:
+      SERVER_PORT: "8084"
+      SPRING_APPLICATION_NAME: cart-service
+
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL}
+
+      EUREKA_SERVER: ${EUREKA_SERVER}
+
+      DB_URL: jdbc:postgresql://postgres:5432/cart_db
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+      KEYCLOAK_JWK_SET_URI: ${KEYCLOAK_JWK_SET_URI}
+      KEYCLOAK_ISSUER: ${KEYCLOAK_ISSUER}
+    networks:
+      - ecommerce-network
+
+  order-service:
+    image: karthik11946/order-service:latest
+    container_name: order-service
+    restart: unless-stopped
+
+    depends_on:
+      - postgres
+      - config-server
+      - eureka-server
+
+    environment:
+      SERVER_PORT: "8085"
+      SPRING_APPLICATION_NAME: order-service
+
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL}
+
+      EUREKA_SERVER: ${EUREKA_SERVER}
+
+      DB_URL: jdbc:postgresql://postgres:5432/order_db
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+      KEYCLOAK_JWK_SET_URI: ${KEYCLOAK_JWK_SET_URI}
+      KEYCLOAK_ISSUER: ${KEYCLOAK_ISSUER}
+
+    networks:
+      - ecommerce-network
+
+  product-service:
+    image: karthik11946/product-service:latest
+    container_name: product-service
+    restart: unless-stopped
+
+
+
+    depends_on:
+      - postgres
+      - config-server
+      - eureka-server
+
+    environment:
+      SERVER_PORT: "8083"
+      SPRING_APPLICATION_NAME: product-service
+
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL}
+
+      EUREKA_SERVER: ${EUREKA_SERVER}
+
+      DB_URL: jdbc:postgresql://postgres:5432/product_db
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+
+      KEYCLOAK_JWK_SET_URI: ${KEYCLOAK_JWK_SET_URI}
+      KEYCLOAK_ISSUER: ${KEYCLOAK_ISSUER}
+
+    networks:
+      - ecommerce-network
+
+  user-activity-service:
+    image: karthik11946/user-activity-service:latest
+    container_name: user-activity-service
+    restart: unless-stopped
+
+    depends_on:
+      - postgres
+      - config-server
+      - eureka-server
+
+    environment:
+      SERVER_PORT: "8086"
+      SPRING_APPLICATION_NAME: user-activity-service
+
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL}
+
+      EUREKA_SERVER: ${EUREKA_SERVER}
+
+      DB_URL: jdbc:postgresql://postgres:5432/useractivity_db
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+
+      KEYCLOAK_JWK_SET_URI: ${KEYCLOAK_JWK_SET_URI}
+      KEYCLOAK_ISSUER: ${KEYCLOAK_ISSUER}
+
+    networks:
+      - ecommerce-network
+
+  gateway-service:
+    image: karthik11946/gateway-service:latest
+    container_name: gateway-service
+    restart: unless-stopped
+
+    ports:
+      - "8080:8080"
+
+    depends_on:
+      - config-server
+      - eureka-server
+
+    environment:
+      SERVER_PORT: "8080"
+      SPRING_APPLICATION_NAME: api-gateway
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL}
+      EUREKA_SERVER: ${EUREKA_SERVER}
+
+    networks:
+      - ecommerce-network
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.3.4
+    container_name: keycloak
+    restart: unless-stopped
+
+    ports:
+      - "9090:8080"
+
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME: auth.ecommerce.local
+      KC_HOSTNAME_PORT: "9090"     
+
+    command:
+      - start-dev
+      - --import-realm
+
+    volumes:
+      - ./keycloak/exports:/opt/keycloak/data/import
+      - keycloak_data:/opt/keycloak/data
+
+    depends_on:
+      - postgres
+
+    networks:
+      - ecommerce-network
+
+  frontend:
+    image: karthik11946/ecommerce-frontend:latest
+    container_name: ecommerce-frontend
+    restart: unless-stopped
+
+    ports:
+      - "3000:80"
+
+    depends_on:
+      - gateway-service
+
+    networks:
+      - ecommerce-network
+
+networks:
+  ecommerce-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  keycloak_data:

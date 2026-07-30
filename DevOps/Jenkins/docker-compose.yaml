@@ -1,0 +1,24 @@
+services:
+  jenkins:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    image: ecommerce/jenkins:lts
+
+    container_name: jenkins
+    user: root
+
+    restart: unless-stopped
+
+    ports:
+      - "9091:8080"
+      - "50000:50000"
+
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+
+volumes:
+  jenkins_home:

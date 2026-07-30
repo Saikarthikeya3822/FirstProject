@@ -1,8 +1,27 @@
+## .gitignore
+# Maven
 HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+
+#Backend
+BackEnd/
+
+#Keycloak
+keycloak/
+
+#Microservices
+Microservices/
+
+#FrontEnd.zip
+FrontEnd.zip
+
+## Environment Variables
+.env
+
+
 
 ### STS ###
 .apt_generated

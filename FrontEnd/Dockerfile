@@ -1,4 +1,4 @@
-# Stage 1 - Build React app
+# Stage 1
 FROM node:22-alpine AS build
 
 WORKDIR /app
@@ -10,10 +10,13 @@ COPY . .
 
 RUN npm run build
 
-# Stage 2 - Serve using Nginx
+# Stage 2
 FROM nginx:alpine
 
 COPY --from=build /app/build /usr/share/nginx/html
+
+# 👇 This line is missing in your Dockerfile
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 
