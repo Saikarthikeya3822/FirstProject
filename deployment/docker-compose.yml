@@ -28,7 +28,7 @@ services:
       - ecommerce-network
 
   config-server:
-    image: karthik11946/config-server:latest
+    image: karthik11946/configserver:latest
     container_name: config-server
     restart: unless-stopped
     ports:
@@ -210,7 +210,7 @@ services:
       - ecommerce-network
 
   gateway-service:
-    image: karthik11946/gateway-service:latest
+    image: karthik11946/api-gateway:latest
     container_name: gateway-service
     restart: unless-stopped
 
