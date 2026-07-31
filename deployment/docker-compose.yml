@@ -259,20 +259,6 @@ services:
     networks:
       - ecommerce-network
 
-  frontend:
-    image: karthik11946/ecommerce-frontend:latest
-    container_name: ecommerce-frontend
-    restart: unless-stopped
-
-    ports:
-      - "3000:80"
-
-    depends_on:
-      - gateway-service
-
-    networks:
-      - ecommerce-network
-
 networks:
   ecommerce-network:
     driver: bridge
