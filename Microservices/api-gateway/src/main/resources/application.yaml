@@ -1,0 +1,82 @@
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: true
+              lower-case-service-id: true
+
+          routes:
+
+            # ✅ USER SERVICE
+            - id: user-service
+              uri: lb://user-service
+              predicates:
+                - Path=/register,/login,/user/**
+
+            # ✅ PRODUCT SERVICE
+            - id: product-service
+              uri: lb://product-service
+              predicates:
+                - Path=/products/**
+
+            # ✅ PRODUCT IMAGES
+            - id: product-images
+              uri: lb://product-service
+              predicates:
+                - Path=/images/**
+
+            # ✅ CART SERVICE
+            - id: cart-service
+              uri: lb://cart-service
+              predicates:
+                - Path=/cart/**
+
+            # ✅ ORDER SERVICE
+            - id: order-service
+              uri: lb://order-service
+              predicates:
+                - Path=/orders/**
+
+            # ✅ AI SERVICE
+            - id: ai-service
+              uri: lb://ai-service
+              predicates:
+                - Path=/ai/**,/agent/**,/springai/**
+
+            # ✅ USER ACTIVITY SERVICE
+            - id: user-activity-service
+              uri: lb://user-activity-service
+              predicates:
+                - Path=/activities/**
+
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:3000"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+
+server:
+  port: 8080
+
+eureka:
+  instance:
+    prefer-ip-address: true
+
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_SERVER}
+    fetch-registry: true
+    register-with-eureka: true
