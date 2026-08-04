@@ -1,4 +1,6 @@
-const AIResponseRenderer = ({ data, BASE_URL }) => {
+import {API_BASE} from "../constants/apiConstants";
+
+const AIResponseRenderer = ({ data}) => {
   if (!data) {
     return null;
   }
@@ -35,7 +37,7 @@ const AIResponseRenderer = ({ data, BASE_URL }) => {
           >
             {product.imagename && (
               <img
-                src={`${BASE_URL}/products/image/${product.prodid}`}
+                src={`${API_BASE}/products/image/${product.prodid}`}
                 alt={product.prodname}
                 style={{
                   width: "100%",

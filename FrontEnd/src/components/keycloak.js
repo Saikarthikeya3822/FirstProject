@@ -6,3 +6,4 @@ const keycloak = new Keycloak({
   realm: "Ecommerce-Users",
   clientId: "Ecommerce-react-app",
 });
+export default keycloak;

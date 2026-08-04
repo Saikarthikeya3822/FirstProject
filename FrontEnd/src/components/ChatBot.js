@@ -1,11 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import AIResponseRenderer from "./AIResponseRenderer";
-import {
-  getChatHistory,
-  getChatConversations,
-  deleteChatConversation,
-  sendChatMessage,
-} from "../service/productService";
+import api from "../Utils/api";
 /**
  * Professional ChatGPT-like AI Chatbot Component
  * Features:
@@ -83,7 +78,11 @@ const ChatBot = ({ onRecommendation }) => {
   const loadChatHistory = async (conversationId) => {
     try {
       setLoading(true);
-      const history = await getChatHistory(conversationId);
+      const response = await api.get(
+        `/springai/chat/history/${conversationId}`
+      );
+
+      const history = response.data;
 
       // Convert backend format to message format
       // Backend: [{ role: "user|assistant", content: "..." }] or [{ role, content, data }]
@@ -108,7 +107,9 @@ const ChatBot = ({ onRecommendation }) => {
 
   const loadConversations = async () => {
     try {
-      const data = await getChatConversations();
+      const response = await api.get("/springai/chat/conversations");
+
+      const data = response.data;
 
       console.log("Loaded conversations:", data);
 
@@ -145,7 +146,7 @@ const ChatBot = ({ onRecommendation }) => {
     e.stopPropagation();
 
     try {
-      await deleteChatConversation(conversationId);
+      await api.delete(`/springai/chat/${conversationId}`);
 
       // Remove from sidebar
       setConversations((prev) =>
@@ -199,9 +200,14 @@ const ChatBot = ({ onRecommendation }) => {
     try {
       // ================= API CALL =================
 
-      const aiResponse = await sendChatMessage(userInput, activeConversationId);
+      const response = await api.post("/springai/chat", {
+        message: userInput,
+        conversationId: activeConversationId,
+      });
 
       // ================= JSON RESPONSE =================
+
+      const aiResponse = response.data;
 
       console.log("Full AI Response:", aiResponse);
 
@@ -645,7 +651,6 @@ const ChatBot = ({ onRecommendation }) => {
                       {msg.role === "assistant" && msg.data && (
                         <AIResponseRenderer
                           data={msg.data}
-                          BASE_URL={BASE_URL}
                         />
                       )}
                     </div>
