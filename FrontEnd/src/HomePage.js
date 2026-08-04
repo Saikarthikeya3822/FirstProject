@@ -7,6 +7,7 @@ import {
   deleteAllProducts,
   fetchCartItems,
   filterFetchProducts,
+  searchProducts,
 } from "./service/productService";
 import "./styles/HomePage.css";
 import Sidebar from "./components/Sidebar";
@@ -16,7 +17,6 @@ import "./styles/Pagination.css";
 import useUnauthorizedHandler from "./components/UnauthorizedHandler";
 import SessionPopup from "./components/SessionPopup";
 import CartList from "./components/CartList";
-import axios from "axios";
 import keycloak from "./components/keycloak";
 import SidebarComponent from "./components/Sidebar";
 import { Toolbar } from 'primereact/toolbar';
@@ -58,7 +58,6 @@ const HomePage = () => {
     navigate("/"); // Navigate to LoginPage.jsx
   };
   const handleSearch = async (value) => {
-    const token = localStorage.getItem("token");
     if (value.trim() == "") {
       setsearchProducts(products);
       setView("view");
@@ -66,15 +65,7 @@ const HomePage = () => {
     }
 
     try {
-      const response = await axios.get(
-        `http://localhost:8080/products/search?keyword=${value}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      const data = response.data;
+      const data = await searchProducts(value);
       console.log("after search recived data", data);
       setsearchProducts(data);
     } catch (error) {

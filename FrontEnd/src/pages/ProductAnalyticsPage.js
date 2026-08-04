@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { getProductAnalytics } from "../service/productService";
 import "../styles/Dashboard.css";
 import { Card } from "primereact/card";
 import { ProgressSpinner } from "primereact/progressspinner";
@@ -26,55 +26,12 @@ const ProductAnalyticsPage = () => {
 
   const loadDashboard = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const data = await getProductAnalytics();
 
-      // Dashboard KPI
-      const dashboardResponse = await axios.get(
-        "http://localhost:8080/activities/dashboard",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      setAnalytics(dashboardResponse.data);
-
-      // Top Viewed Products
-      const viewedResponse = await axios.get(
-        "http://localhost:8080/activities/top-viewed-products",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      setTopViewedProducts(viewedResponse.data);
-
-      // Top Cart Products
-      const cartResponse = await axios.get(
-        "http://localhost:8080/activities/top-cart-products",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      setTopCartProducts(cartResponse.data);
-
-      // Top Purchased Products
-      const purchasedResponse = await axios.get(
-        "http://localhost:8080/activities/top-purchased-products",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      setTopPurchasedProducts(purchasedResponse.data);
+      setAnalytics(data.dashboard);
+      setTopViewedProducts(data.viewed);
+      setTopCartProducts(data.cart);
+      setTopPurchasedProducts(data.purchased);
     } catch (error) {
       console.error("Analytics Error:", error);
     } finally {

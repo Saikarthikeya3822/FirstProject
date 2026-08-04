@@ -1,5 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import AIResponseRenderer from "./AIResponseRenderer";
+import {
+  getChatHistory,
+  getChatConversations,
+  deleteChatConversation,
+  sendChatMessage,
+} from "../service/productService";
 /**
  * Professional ChatGPT-like AI Chatbot Component
  * Features:
@@ -11,7 +17,6 @@ import AIResponseRenderer from "./AIResponseRenderer";
  * - Auto-scrolling and typing indicators
  */
 const ChatBot = ({ onRecommendation }) => {
-  const BASE_URL = "http://localhost:8080";
   const chatEndRef = useRef(null);
   const messagesEndRef = useRef(null);
 
@@ -38,13 +43,6 @@ const ChatBot = ({ onRecommendation }) => {
    */
   const generateConversationId = () => {
     return crypto.randomUUID();
-  };
-
-  /**
-   * Get auth token from localStorage
-   */
-  const getAuthToken = () => {
-    return localStorage.getItem("token");
   };
 
   /**
@@ -85,22 +83,7 @@ const ChatBot = ({ onRecommendation }) => {
   const loadChatHistory = async (conversationId) => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `${BASE_URL}/springai/chat/history/${conversationId}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${getAuthToken()}`,
-            "Content-Type": "application/json",
-          },
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to load chat history");
-      }
-
-      const history = await response.json();
+      const history = await getChatHistory(conversationId);
 
       // Convert backend format to message format
       // Backend: [{ role: "user|assistant", content: "..." }] or [{ role, content, data }]
@@ -125,18 +108,7 @@ const ChatBot = ({ onRecommendation }) => {
 
   const loadConversations = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/springai/chat/conversations`, {
-        headers: {
-          Authorization: `Bearer ${getAuthToken()}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to load conversations");
-      }
-
-      const data = await response.json();
+      const data = await getChatConversations();
 
       console.log("Loaded conversations:", data);
 
@@ -173,20 +145,7 @@ const ChatBot = ({ onRecommendation }) => {
     e.stopPropagation();
 
     try {
-      const response = await fetch(
-        `${BASE_URL}/springai/chat/${conversationId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${getAuthToken()}`,
-            "Content-Type": "application/json",
-          },
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to delete conversation");
-      }
+      await deleteChatConversation(conversationId);
 
       // Remove from sidebar
       setConversations((prev) =>
@@ -240,29 +199,9 @@ const ChatBot = ({ onRecommendation }) => {
     try {
       // ================= API CALL =================
 
-      const response = await fetch(`${BASE_URL}/springai/chat`, {
-        method: "POST",
-
-        headers: {
-          Authorization: `Bearer ${getAuthToken()}`,
-
-          "Content-Type": "application/json",
-        },
-
-        body: JSON.stringify({
-          message: userInput,
-
-          conversationId: activeConversationId,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to get AI response");
-      }
+      const aiResponse = await sendChatMessage(userInput, activeConversationId);
 
       // ================= JSON RESPONSE =================
-
-      const aiResponse = await response.json();
 
       console.log("Full AI Response:", aiResponse);
 

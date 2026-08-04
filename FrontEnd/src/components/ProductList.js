@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { ConfirmPopup } from "primereact/confirmpopup";
 import { Dropdown } from "primereact/dropdown";
 import { Dialog } from "primereact/dialog";
-import axios from "axios";
 import keycloak from "./keycloak";
 import {
   handleDelete,
@@ -13,7 +12,7 @@ import {
 } from "../service/productService";
 import useUnauthorizedHandler from "./UnauthorizedHandler";
 import SessionPopup from "./SessionPopup";
-import { addOrder } from "../service/productService";
+import { addOrder, trackActivity } from "../service/productService";
 const ProductList = ({
   products,
   setProducts,
@@ -141,21 +140,12 @@ const ProductList = ({
   };
   const trackCartActivity = async (id) => {
     try {
-      await axios.post(
-        "http://localhost:8080/activities",
-        {
-          userId: localStorage.getItem("userId"),
-          productId: id,
-          activityType: "ADD_TO_CART",
-          metadata: "Product Added to Cart",
-        },
-        {
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        },
-      );
+      await trackActivity({
+        userId: localStorage.getItem("userId"),
+        productId: id,
+        activityType: "ADD_TO_CART",
+        metadata: "Product Added to Cart",
+      });
     } catch (error) {
       console.error(error);
     }
@@ -203,21 +193,12 @@ const ProductList = ({
   };
  const trackOrderActivity = async (id) => {
     try {
-      await axios.post(
-        "http://localhost:8080/activities",
-        {
-          userId: localStorage.getItem("userId"),
-          productId: id,
-          activityType: "PURCHASE_PRODUCT",
-          metadata: "Order Placed",
-        },
-        {
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        },
-      );
+      await trackActivity({
+        userId: localStorage.getItem("userId"),
+        productId: id,
+        activityType: "PURCHASE_PRODUCT",
+        metadata: "Order Placed",
+      });
     } catch (error) {
       console.error(error);
     }

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { fetchCartItems } from "../service/productService";
 import useUnauthorizedHandler from "./UnauthorizedHandler";
 

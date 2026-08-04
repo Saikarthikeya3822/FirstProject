@@ -1,52 +1,39 @@
-import axios from "axios";
-import api from "../Utils/api.js";
-
-const API_BASE_URL = "http://localhost:8080";
-
-const UPDATE_URL = `${API_BASE_URL}/updateproductbyid`;
-const DELETE_BY_ID_URL = `${API_BASE_URL}/deleteproductbyid`;
+import api from "../Utils/api";
 
 // ===================== Register =====================
 export const registerUser = async (userData) => {
   console.log("Data:", userData, JSON.stringify(userData));
 
-  const response = await fetch(`${API_BASE_URL}/register`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(userData),
-  });
+  try {
+    const response = await api.post("/register", userData);
+    console.log("Response is:", response);
+    return response.data;
+  } catch (error) {
+    if (error.response?.status === 409) {
+      throw new Error(error.response?.data?.message || "User already exists.");
+    }
 
-  console.log("Response is:", response);
+    if (error.response?.status === 500) {
+      throw new Error("Registration failed due to server error.");
+    }
 
-  if (response.status === 409) {
-    const error = await response.json();
-    throw new Error(error.message || "User already exists.");
-  } else if (response.status === 500) {
-    throw new Error("Registration failed due to server error.");
+    throw error;
   }
-
-  return response.json();
 };
 
 // ===================== Cart =====================
 export const fetchCartItems = async () => {
-  const token = localStorage.getItem("token");
   const id = localStorage.getItem("userId");
 
-  const res = await axios.get(`${API_BASE_URL}/cart/${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const res = await api.get(`/cart/${id}`);
   console.log("Cart data from service:", res);
   return res.data;
 };
 
 // ===================== Filter =====================
 export const filterFetchProducts = async (status, price) => {
-  const token = localStorage.getItem("token");
-
-  const response = await axios.get(`${API_BASE_URL}/products/filter`, {
+  const response = await api.get("/products/filter", {
     params: { status, price },
-    headers: { Authorization: `Bearer ${token}` },
   });
 
   return response.data;
@@ -58,15 +45,80 @@ export const getProducts = async () => {
   console.log("products from db is :", response.data);
   return response.data;
 };
-// ===================== Get One =====================
-export const getProductById = async (id) => {
-  const token = localStorage.getItem("token");
 
-  const response = await axios.get(`http://localhost:8080/products/${id}`, {
+export const searchProducts = async (keyword) => {
+  const response = await api.get("/products/search", {
+    params: { keyword },
+  });
+
+  return response.data;
+};
+
+export const getProductsByCategory = async (category) => {
+  const response = await api.get(`/products/category/${category}`);
+  return response.data;
+};
+
+export const trackActivity = async (payload) => {
+  const response = await api.post("/activities", payload, {
     headers: {
-      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
     },
   });
+
+  return response.data;
+};
+
+export const compareProductsWithAI = async (product1, product2) => {
+  const response = await api.post("/springai/products/compare", {
+    product1,
+    product2,
+  });
+
+  return response.data;
+};
+
+export const getProductAnalytics = async () => {
+  const [dashboard, viewed, cart, purchased] = await Promise.all([
+    api.get("/activities/dashboard"),
+    api.get("/activities/top-viewed-products"),
+    api.get("/activities/top-cart-products"),
+    api.get("/activities/top-purchased-products"),
+  ]);
+
+  return {
+    dashboard: dashboard.data,
+    viewed: viewed.data,
+    cart: cart.data,
+    purchased: purchased.data,
+  };
+};
+
+export const getChatHistory = async (conversationId) => {
+  const response = await api.get(`/springai/chat/history/${conversationId}`);
+  return response.data;
+};
+
+export const getChatConversations = async () => {
+  const response = await api.get("/springai/chat/conversations");
+  return response.data;
+};
+
+export const deleteChatConversation = async (conversationId) => {
+  await api.delete(`/springai/chat/${conversationId}`);
+};
+
+export const sendChatMessage = async (message, conversationId) => {
+  const response = await api.post("/springai/chat", {
+    message,
+    conversationId,
+  });
+
+  return response.data;
+};
+// ===================== Get One =====================
+export const getProductById = async (id) => {
+  const response = await api.get(`/products/${id}`);
 
   return response.data;
 };
@@ -81,48 +133,24 @@ export const saveProduct = async (product, image) => {
   );
   formData.append("imageFile", image);
 
-  const token = localStorage.getItem("token");
-
-  const response = await fetch(`${API_BASE_URL}/products/addproduct`, {
-    method: "POST",
-    body: formData,
+  const response = await api.post("/products/addproduct", formData, {
     headers: {
       Accept: "application/json",
-      Authorization: `Bearer ${token}`,
     },
   });
 
-  if (!response.ok) {
-    throw new Error("Failed to save product.");
-  }
-
-  return response.json();
+  return response.data;
 };
 
 // ===================== Delete All =====================
 export const deleteAllProducts = async () => {
-  const token = localStorage.getItem("token");
-
-  const response = await fetch(`${API_BASE_URL}/deleteallproducts`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to delete all products.");
-  }
+  await api.delete("/deleteallproducts");
 };
 
 // ===================== Delete by ID =====================
 export const handleDelete = async (id) => {
   try {
-    const token = localStorage.getItem("token");
-
-    const response = await axios.delete(`${DELETE_BY_ID_URL}/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await api.delete(`/${id}`);
 
     if (response.status === 200 || response.status === 204) {
       alert("Product deleted successfully!");
@@ -137,10 +165,8 @@ export const handleDelete = async (id) => {
 // ===================== Update =====================
 export const handleUpdate = async (id, updatedProduct) => {
   try {
-    const token = localStorage.getItem("token");
-
-    const response = await axios.put(
-      `${UPDATE_URL}/${id}`,
+    const response = await api.put(
+      `/${id}`,
       {
         prodName: updatedProduct.name,
         price: updatedProduct.price,
@@ -149,7 +175,6 @@ export const handleUpdate = async (id, updatedProduct) => {
       },
       {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       },
@@ -163,139 +188,67 @@ export const handleUpdate = async (id, updatedProduct) => {
 
 // ===================== Add Cart =====================
 export const addCart = async (cartItem) => {
-  const token = localStorage.getItem("token");
-
-  return axios.post(`${API_BASE_URL}/cart/addCart`, cartItem, {
-    headers: {
-      contentType: "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  return api.post(`/cart/addCart`, cartItem);
 };
 
 // ===================== Orders =====================
 export const addOrder = async (order) => {
-  const token = localStorage.getItem("token");
-
-  const response = await axios.post(`${API_BASE_URL}/orders/addOrder`, order, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const response = await api.post(`/orders/addOrder`, order);
 
   return response.data;
 };
 
 export const getAllOrderProducts = async () => {
-  const token = localStorage.getItem("token");
-
-  const res = await axios.get(`${API_BASE_URL}/orders`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const res = await api.get("/orders");
 
   return res.data;
 };
 export const getOrders = (page, size) => {
-  const token = localStorage.getItem("token");
-  return api.get(`/orders?page=${page}&size=${size}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  return api.get(`/orders?page=${page}&size=${size}`);
 };
 export const getFilterChildren = async (filterType) => {
-  const token = localStorage.getItem("token");
-
-  const res = await axios.get(
-    `${API_BASE_URL}/orders/filter-values?type=${filterType}`,
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    },
-  );
+  const res = await api.get(`/orders/filter-values?type=${filterType}`);
 
   return res.data;
 };
 export const getAllOrders = (page, size, filterType, filterValue) => {
-  const token = localStorage.getItem("token");
-  return axios.get(`${API_BASE_URL}/orders`, {
+  return api.get("/orders", {
     params: {
       page,
       size,
       filterType,
       filterValue,
     },
-    headers: { Authorization: `Bearer ${token}` },
   });
 };
 export const getAllTrackers = (page, size, filterType, filterValue) => {
-  const token = localStorage.getItem("token");
-  return axios.get(`${API_BASE_URL}/trackers`, {
+  return api.get("/trackers", {
     params: {
       page,
       size,
       filterType,
       filterValue,
     },
-    headers: { Authorization: `Bearer ${token}` },
   });
 };
 
 export const analyzeProduct = async (id) => {
-  const token = localStorage.getItem("token");
-
-  const response = await axios.post(
-    `http://localhost:8080/springai/analyze-product/${id}`,
-    {},
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  );
+  const response = await api.post(`/springai/analyze-product/${id}`, {});
 
   return response.data;
 };
 export const getComparisonOptions = async (productId) => {
-  const token = localStorage.getItem("token");
-
-  const response = await axios.get(
-    `http://localhost:8080/products/comparison-options/${productId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  );
+  const response = await api.get(`/products/comparison-options/${productId}`);
 
   return response.data;
 };
 export const getUserAnalytics = async (userId, days = 30) => {
-  const token = localStorage.getItem("token");
-
-  const response = await axios.get(
-    `${API_BASE_URL}/activities/users/${userId}/analytics?days=${days}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  );
+  const response = await api.get(`/activities/users/${userId}/analytics?days=${days}`);
 
   return response.data;
 };
 export const getUserInsights = async (userId) => {
+  const response = await api.get(`/springai/user-insights/${userId}`);
 
-    const token = localStorage.getItem("token");
-
-    const response = await axios.get(
-        `${API_BASE_URL}/springai/user-insights/${userId}`,
-        {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        }
-    );
-
-    return response.data;
+  return response.data;
 };

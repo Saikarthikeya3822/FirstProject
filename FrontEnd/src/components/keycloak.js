@@ -2,9 +2,7 @@
 import Keycloak from "keycloak-js";
 
 const keycloak = new Keycloak({
-   url: "http://auth.ecommerce.local:9090",
+   url: "https://keycloak-production-d32a.up.railway.app",
   realm: "Ecommerce-Users",
   clientId: "Ecommerce-react-app",
 });
-
-export default keycloak;

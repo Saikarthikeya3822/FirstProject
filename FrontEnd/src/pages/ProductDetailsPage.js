@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { useParams } from "react-router-dom";
-import { getProductById } from "../service/productService";
-import { analyzeProduct } from "../service/productService";
+import {
+  getProductById,
+  analyzeProduct,
+  getProductsByCategory,
+  compareProductsWithAI,
+  trackActivity,
+} from "../service/productService";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { Rating } from "primereact/rating";
@@ -56,21 +60,12 @@ const ProductDetailsPage = () => {
   };
   const trackAiAnalysisViewed = async () => {
     try {
-      await axios.post(
-        "http://localhost:8080/activities",
-        {
-          userId: localStorage.getItem("userId"),
-          productId: id,
-          activityType: "AI_ANALYSIS_VIEWED",
-          metadata: "AI Verdict Opened",
-        },
-        {
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        },
-      );
+      await trackActivity({
+        userId: localStorage.getItem("userId"),
+        productId: id,
+        activityType: "AI_ANALYSIS_VIEWED",
+        metadata: "AI Verdict Opened",
+      });
     } catch (error) {
       console.error(error);
     }
@@ -107,18 +102,9 @@ const ProductDetailsPage = () => {
   };
   const loadSimilarProducts = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const data = await getProductsByCategory(product.category);
 
-      const response = await axios.get(
-        `http://localhost:8080/products/category/${product.category}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      const filtered = response.data.filter((p) => p.prodid !== product.prodid);
+      const filtered = data.filter((p) => p.prodid !== product.prodid);
 
       setSimilarProducts(filtered);
     } catch (err) {
@@ -127,25 +113,14 @@ const ProductDetailsPage = () => {
   };
   const trackCompareProduct = async (comparedProductId) => {
     try {
-      const token = localStorage.getItem("token");
-
-      await axios.post(
-        "http://localhost:8080/activities",
-        {
-          userId: localStorage.getItem("userId"),
-          productId: id,
-          activityType: "COMPARE_PRODUCT",
-          metadata: JSON.stringify({
-            comparedProductId: comparedProductId,
-          }),
-        },
-        {
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
+      await trackActivity({
+        userId: localStorage.getItem("userId"),
+        productId: id,
+        activityType: "COMPARE_PRODUCT",
+        metadata: JSON.stringify({
+          comparedProductId: comparedProductId,
+        }),
+      });
     } catch (error) {
       console.error(error);
     }
@@ -154,23 +129,10 @@ const ProductDetailsPage = () => {
     setComparisonLoading(true);
 
     try {
-      const token = localStorage.getItem("token");
+      const response = await compareProductsWithAI(product, compareProduct);
+      console.log("Comparison Result:", response);
 
-      const response = await axios.post(
-        "http://localhost:8080/springai/products/compare",
-        {
-          product1: product,
-          product2: compareProduct,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-      console.log("Comparison Result:", response.data);
-
-      setComparisonResult(response.data);
+      setComparisonResult(response);
       trackCompareProduct(compareProduct.prodid);
     } catch (err) {
       console.error(err);
@@ -181,43 +143,24 @@ const ProductDetailsPage = () => {
   const trackViewProduct = async () => {
     try {
       const userId = localStorage.getItem("userId");
-      const token = localStorage.getItem("token");
-      await axios.post(
-        "http://localhost:8080/activities",
-        {
-          userId: userId,
-          productId: id,
-          activityType: "VIEW_PRODUCT",
-          metadata: "Product Details Viewed",
-        },
-        {
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
+      await trackActivity({
+        userId: userId,
+        productId: id,
+        activityType: "VIEW_PRODUCT",
+        metadata: "Product Details Viewed",
+      });
     } catch (error) {
       console.log(error);
     }
   };
   const trackPriceActivity = async () => {
     try {
-      await axios.post(
-        "http://localhost:8080/activities",
-        {
-          userId: localStorage.getItem("userId"),
-          productId: id,
-          activityType: "TRACK_PRICE",
-          metadata: "Price Tracking Enabled",
-        },
-        {
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        },
-      );
+      await trackActivity({
+        userId: localStorage.getItem("userId"),
+        productId: id,
+        activityType: "TRACK_PRICE",
+        metadata: "Price Tracking Enabled",
+      });
     } catch (error) {
       console.error(error);
     }
